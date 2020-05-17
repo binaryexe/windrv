@@ -1,10 +1,10 @@
 #include <ntddk.h>
 
-UNICODE_STRING DeviceName = RTL_CONSTANT_STRING(L"\\device\\mydevice123");
+UNICODE_STRING DeviceName = RTL_CONSTANT_STRING(L"\\device\\SasDemoDev");
 
 PDEVICE_OBJECT DeviceObject = NULL;
 
-UNICODE_STRING SymLinkName = RTL_CONSTANT_STRING(L"\\??\\mydevice123");
+UNICODE_STRING SymLinkName = RTL_CONSTANT_STRING(L"\\??\\SasDemoDev");
 
 VOID Unload(PDRIVER_OBJECT DriverObject)
 {
@@ -14,11 +14,37 @@ VOID Unload(PDRIVER_OBJECT DriverObject)
 	KdPrint(("Driver unloaded \r\n"));
 }
 
+NTSTATUS DispatchPassThru(PDEVICE_OBJECT DeviceObject1, PIRP Irp)
+{
+	UNREFERENCED_PARAMETER(DeviceObject1);
+	PIO_STACK_LOCATION irpsp = IoGetCurrentIrpStackLocation(Irp);
+	NTSTATUS status = STATUS_SUCCESS;
+	//KdPrint(("SasDemoDrv: DispatchPassThru \r\n"));
+	switch (irpsp->MajorFunction)
+	{
+	case IRP_MJ_CREATE:
+		KdPrint(("Create request \r\n"));
+		break;
+	case IRP_MJ_CLOSE:
+		KdPrint(("Close request \r\n"));
+		break;
+	case IRP_MJ_READ:
+		KdPrint(("Read request \r\n"));
+		break;
+	default:
+		break;
+	}
+
+	Irp->IoStatus.Information = 0;
+	Irp->IoStatus.Status = status;
+	IoCompleteRequest(Irp, IO_NO_INCREMENT);
+	return status;
+}
+
 NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
 {
 	NTSTATUS status;
 	int i;
-	UNREFERENCED_PARAMETER(DriverObject);
 	UNREFERENCED_PARAMETER(RegistryPath);
 	DriverObject->DriverUnload = Unload;
 
@@ -34,7 +60,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
 	status = IoCreateSymbolicLink(&SymLinkName, &DeviceName);
 	if (!NT_SUCCESS(status))
 	{
-		KdPrint(("Creating sysmbolic failed!\r\n"));
+		KdPrint(("Creating symbolic link failed!\r\n"));
 		IoDeleteDevice(DeviceObject);
 		return status;
 	}
@@ -43,6 +69,9 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
 	{
 		DriverObject->MajorFunction[i] = DispatchPassThru;
 	}
+
+	//DriverObject->MajorFunction[IRP_MJ_WRITE] = DispatchWrite;
+	//DriverObject->MajorFunction[IRP_MJ_READ] = DispatchRead;
 
 	KdPrint(("Driver successfully loaded \r\n"));
 

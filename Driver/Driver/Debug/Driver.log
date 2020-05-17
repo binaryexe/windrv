@@ -1,12 +1,13 @@
 ﻿  Building 'Driver' with toolset 'WindowsKernelModeDriver10.0' and the 'Universal' target platform.
   Stamping Debug\Driver.inf
-  Stamping [Version] section with DriverVer=05/17/2020,17.53.48.971
+  Stamping [Version] section with DriverVer=05/17/2020,22.41.27.107
+  Source.c
   Driver.vcxproj -> C:\Users\mukes\Source\Repos\Driver\Debug\Driver.sys
   Done Adding Additional Store
   Successfully signed: C:\Users\mukes\Source\Repos\Driver\Debug\Driver.sys
   
   Driver is 'Universal'.
-  .........................
+  ........................
   Signability test complete.
   
   Errors:
