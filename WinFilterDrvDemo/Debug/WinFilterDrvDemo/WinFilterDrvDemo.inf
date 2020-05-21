@@ -1,0 +1,90 @@
+;
+; WinFilterDrvDemo.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=Sample ; TODO: edit Class
+ClassGuid={78A1C341-4539-11d3-B88D-00C04FAD5171} ; TODO: edit ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=WinFilterDrvDemo.cat
+DriverVer = 05/21/2020,9.35.35.526
+PnpLockDown=1
+
+[DestinationDirs]
+DefaultDestDir = 12
+WinFilterDrvDemo_Device_CoInstaller_CopyFiles = 11
+
+; ================= Class section =====================
+
+[ClassInstall32]
+Addreg=SampleClassReg
+
+[SampleClassReg]
+HKR,,,0,%ClassName%
+HKR,,Icon,,-5
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+WinFilterDrvDemo.sys  = 1,,
+;
+
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NTx86
+
+[Standard.NTx86]
+%WinFilterDrvDemo.DeviceDesc%=WinFilterDrvDemo_Device, Root\WinFilterDrvDemo ; TODO: edit hw-id
+
+[WinFilterDrvDemo_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+WinFilterDrvDemo.sys
+
+;-------------- Service installation
+[WinFilterDrvDemo_Device.NT.Services]
+AddService = WinFilterDrvDemo,%SPSVCINST_ASSOCSERVICE%, WinFilterDrvDemo_Service_Inst
+
+; -------------- WinFilterDrvDemo driver install sections
+[WinFilterDrvDemo_Service_Inst]
+DisplayName    = %WinFilterDrvDemo.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\WinFilterDrvDemo.sys
+
+;
+;--- WinFilterDrvDemo_Device Coinstaller installation ------
+;
+
+[WinFilterDrvDemo_Device.NT.CoInstallers]
+AddReg=WinFilterDrvDemo_Device_CoInstaller_AddReg
+CopyFiles=WinFilterDrvDemo_Device_CoInstaller_CopyFiles
+
+[WinFilterDrvDemo_Device_CoInstaller_AddReg]
+;
+
+
+[WinFilterDrvDemo_Device_CoInstaller_CopyFiles]
+;
+
+
+[WinFilterDrvDemo_Device.NT.Wdf]
+KmdfService =  WinFilterDrvDemo, WinFilterDrvDemo_wdfsect
+[WinFilterDrvDemo_wdfsect]
+KmdfLibraryVersion = 1.15
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+ClassName="Samples" ; TODO: edit ClassName
+DiskName = "WinFilterDrvDemo Installation Disk"
+WinFilterDrvDemo.DeviceDesc = "WinFilterDrvDemo Device"
+WinFilterDrvDemo.SVCDESC = "WinFilterDrvDemo Service"
